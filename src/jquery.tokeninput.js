@@ -44,6 +44,7 @@ var DEFAULT_SETTINGS = {
     // Callbacks
     onResult: null,
     onAdd: null,
+    onCreate: null,
     onDelete: null,
     onReady: null,
 
@@ -196,6 +197,7 @@ $.TokenList = function (input, url_or_data, settings) {
             outline: "none"
         })
         .attr("id", settings.idPrefix + input.id)
+        .attr("title", settings.placeholderText)
         .focus(function () {
             if (settings.disabled) {
                 return false;
@@ -206,9 +208,9 @@ $.TokenList = function (input, url_or_data, settings) {
         })
         .blur(function () {
             hide_dropdown();
-            $(this).val("");
         })
-        .bind("keyup keydown blur update", resize_input)
+        //disabled input resizing
+        //.bind("keyup keydown blur update", resize_input)
         .keydown(function (event) {
             var previous_token;
             var next_token;
@@ -251,7 +253,9 @@ $.TokenList = function (input, url_or_data, settings) {
                         return false;
                     }
                     break;
-
+                
+                //disabling deletion via keyboard
+                /*
                 case KEY.BACKSPACE:
                     previous_token = input_token.prev();
 
@@ -271,6 +275,7 @@ $.TokenList = function (input, url_or_data, settings) {
                         setTimeout(function(){do_search();}, 5);
                     }
                     break;
+                */
 
                 case KEY.TAB:
                 case KEY.ENTER:
@@ -278,9 +283,12 @@ $.TokenList = function (input, url_or_data, settings) {
                 case KEY.COMMA:
                   if(selected_dropdown_item) {
                     add_token($(selected_dropdown_item).data("tokeninput"));
-                    hidden_input.change();
-                    return false;
+                  } else {
+                    create_token();
+                    dropdown.html("<p>Adding...</p>");
                   }
+                  hidden_input.change();
+                  return false;
                   break;
 
                 case KEY.ESCAPE:
@@ -295,6 +303,9 @@ $.TokenList = function (input, url_or_data, settings) {
                     break;
             }
         });
+        
+    ResetPlaceholder(input_box);
+    BindPlaceholder(input_box);
 
     // Keep a reference to the original input box
     var hidden_input = $(input)
@@ -563,6 +574,15 @@ $.TokenList = function (input, url_or_data, settings) {
         }
     }
 
+    // Create a token 
+    function create_token (item) {
+        var callback = settings.onCreate;
+
+        if($.isFunction(callback)) {
+            callback.call(hidden_input,item);
+        }
+    }
+
     // Select a token in the token list
     function select_token (token) {
         if (!settings.disabled) {
@@ -674,7 +694,8 @@ $.TokenList = function (input, url_or_data, settings) {
                 position: "absolute",
                 top: $(token_list).offset().top + $(token_list).outerHeight(),
                 left: $(token_list).offset().left,
-                width: $(token_list).outerWidth(),
+                //disable dropdown dynamic width
+                //width: $(token_list).outerWidth(),
                 'z-index': settings.zindex
             })
             .show();
