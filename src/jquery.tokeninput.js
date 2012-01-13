@@ -25,6 +25,7 @@ var DEFAULT_SETTINGS = {
     processPrePopulate: false,
 
     // Display settings
+    placeholderText: "",
     hintText: "Type in a search term",
     noResultsText: "No results",
     searchingText: "Searching...",
@@ -197,7 +198,7 @@ $.TokenList = function (input, url_or_data, settings) {
             outline: "none"
         })
         .attr("id", settings.idPrefix + input.id)
-        .attr("title", settings.placeholderText)
+        .attr("placeholder", settings.placeholderText)
         .focus(function () {
             if (settings.disabled) {
                 return false;
@@ -304,8 +305,10 @@ $.TokenList = function (input, url_or_data, settings) {
             }
         });
         
-    ResetPlaceholder(input_box);
-    BindPlaceholder(input_box);
+    //requires jquery.placeholder plugin
+    if(jQuery().placeholder && settings.placeholder) {
+        input_box.placeholder();
+    }
 
     // Keep a reference to the original input box
     var hidden_input = $(input)
